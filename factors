@@ -4,6 +4,7 @@ import time
 import math
 import sys
 
+
 def pollard_rho_factorization(number):
     if number % 2 == 0:
         return 2
@@ -22,14 +23,13 @@ def pollard_rho_factorization(number):
 
     return divisor
 
+
 def main():
     if len(sys.argv) != 2:
         print("Usage: python factorizer.py <file>")
         return
 
     file_path = sys.argv[1]
-
-
     try:
         with open(file_path, 'r') as file:
             numbers = file.readlines()
@@ -40,8 +40,6 @@ def main():
             other_factor = num // factor
             print(f"{num} = {other_factor} * {factor}")
 
-
-
             if time.time() - start_time > 5:
                 print("Time limit exceeded")
                 exit()
@@ -49,7 +47,7 @@ def main():
     except FileNotFoundError:
         print(f"File '{file_path}' not found.")
 
+
 if __name__ == '__main__':
     start_time = time.time()
     main()
-
