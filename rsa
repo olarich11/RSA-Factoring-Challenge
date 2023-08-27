@@ -1,0 +1,60 @@
+#!/usr/bin/python3
+
+import time
+import math
+import sys
+
+def find_prime_factor(n):
+    if n % 2 == 0:
+        return 2
+
+    x = y = 2
+    while True:
+        x = (x ** 2 + 1) % n
+        y = (y ** 2 + 1) % n
+        y = (y ** 2 + 1) % n
+        factor = math.gcd(abs(x - y), n)
+        if factor > 1 and is_probable_prime(factor):
+            return factor
+
+def is_probable_prime(num, tests=5):
+    if num < 2:
+        return False
+    if num < 4:
+        return True
+
+    for _ in range(tests):
+        a = random.randint(2, num - 1)
+        if pow(a, num - 1, num) != 1:
+            return False
+
+    return True
+
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: python rsa_factorizer.py <file>")
+        return
+
+    file_path = sys.argv[1]
+
+    start_time = time.time()
+    try:
+        with open(file_path, 'r') as file:
+            number = int(file.readline().strip())
+
+        prime_factor = find_prime_factor(number)
+        other_factor = number // prime_factor
+
+        print(f"RSA number: {number}")
+        print(f"Prime factors: {prime_factor}, {other_factor}")
+
+        if time.time() - start_time > 5:
+            print("Time limit exceeded")
+            exit()
+
+    except FileNotFoundError:
+        print(f"File '{file_path}' not found.")
+
+if __name__ == '__main__':
+    main()
+
