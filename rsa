@@ -1,62 +1,48 @@
-#!/usr/bin/python3
+#!/usr/bin/env bash
 
-import time
-import math
-import sys
+check_factor()
+{
+	if [ $# -ne 3 ];
+        then
+                args=("$@")
+                count=0
+                num2=1
+                for a in ${args[*]};
+                do
+                        if [ $count -gt 1 ];
+                        then
+                                num2=$(echo $a*$num2 | bc)
+                        fi
+                        count=$((count + 1))
+                done
+        else
+                num2=$3
+        fi
 
+        num1=$2
+        num=$(echo "$1" | tr ':' '=')
 
-def find_prime_factor(n):
-    if n % 2 == 0:
-        return 2
+        result=$(echo "if($num2 > $num1) 1 else 0" | bc)
+	        if ((result == 1)); then
+		        numcp=$num1
+		        num1=$num2
+		        num2=$numcp
+                fi
 
-    x = y = 2
-    while True:
-        x = (x ** 2 + 1) % n
-        y = (y ** 2 + 1) % n
-        y = (y ** 2 + 1) % n
-        factor = math.gcd(abs(x - y), n)
-        if factor > 1 and is_probable_prime(factor):
-            return factor
+        echo "$num$num1*$num2"
+}
 
+if [ $# -ne 1 ]
+then
+        echo 'Usage: rsa <file>'
+        exit 1
+else
 
-def is_probable_prime(num, tests=5):
-    if num < 2:
-        return False
-    if num < 4:
-        return True
+        while read i
+        do
 
-    for _ in range(tests):
-        a = random.randint(2, num - 1)
-        if pow(a, num - 1, num) != 1:
-            return False
-        return True
+                result=$(factor "$i")
+                check_factor $result
 
-
-def main():
-    if len(sys.argv) != 2:
-        print("Usage: python rsa_factorizer.py <file>")
-        return
-
-    file_path = sys.argv[1]
-
-    start_time = time.time()
-    try:
-        with open(file_path, 'r') as file:
-            number = int(file.readline().strip())
-
-        prime_factor = find_prime_factor(number)
-        other_factor = number // prime_factor
-
-        print(f"RSA number: {number}")
-        print(f"Prime factors: {prime_factor}, {other_factor}")
-
-        if time.time() - start_time > 5:
-            print("Time limit exceeded")
-            exit()
-
-    except FileNotFoundError:
-        print(f"File '{file_path}' not found.")
-
-
-if __name__ == '__main__':
-    main()
+        done < "$1"
+fi

@@ -1,53 +1,49 @@
-#!/usr/bin/python3
+#!/usr/bin/env bash
 
-import time
-import math
-import sys
+check_factor()
+{
+	if [ $# -ne 3 ];
+        then
+                args=("$@")
+                count=0
+                num2=1
+                for a in ${args[*]};
+                do
+                        if [ $count -gt 1 ];
+                        then
+                                num2=$(echo $a*$num2 | bc)
+                        fi
+                        count=$((count + 1))
+                done
+        else
+                num2=$3
+        fi
 
+        num1=$2
+        num=$(echo "$1" | tr ':' '=')
 
-def pollard_rho_factorization(number):
-    if number % 2 == 0:
-        return 2
+        result=$(echo "if($num2 > $num1) 1 else 0" | bc)
+	        if ((result == 1)); then
+		        numcp=$num1
+		        num1=$num2
+		        num2=$numcp
+                fi
 
-    x = 2
-    y = 2
-    divisor = 1
+        echo "$num$num1*$num2"
+}
 
-    def f(x):
-        return (x**2 + 1) % number
+if [ $# -ne 1 ]
+then
+        echo 'Usage: factors <file>'
+        exit 1
+else
 
-    while divisor == 1:
-        x = f(x)
-        y = f(f(y))
-        divisor = math.gcd(abs(x - y), number)
+        while read i
+        do
+		if [[ "$i" =~ ^[0-9]+$ ]]; then
+			result=$(factor "$i")
+			check_factor $result
+		fi
 
-    return divisor
-
-
-def main():
-    if len(sys.argv) != 2:
-        print("Usage: python factorizer.py <file>")
-        return
-
-    file_path = sys.argv[1]
-    try:
-        with open(file_path, 'r') as file:
-            numbers = file.readlines()
-
-        for line in numbers:
-            num = int(line.strip())
-            factor = pollard_rho_factorization(num)
-            other_factor = num // factor
-            print(f"{num} = {other_factor} * {factor}")
-
-            if time.time() - start_time > 5:
-                print("Time limit exceeded")
-                exit()
-
-    except FileNotFoundError:
-        print(f"File '{file_path}' not found.")
-
-
-if __name__ == '__main__':
-    start_time = time.time()
-    main()
+        done < "$1"
+fi
